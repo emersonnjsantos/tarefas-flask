@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minhas Tarefas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 450px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    h1 {
+      color: #333;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .task-input {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 2px solid #007BFF;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+      transition: border 0.3s ease;
+    }
+
+    .task-input:focus {
+      outline: none;
+      border-color: #0056b3;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      color: #fff;
+      background-color: #007BFF;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .task-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 30px;
+      overflow-y: auto;
+      max-height: 300px;
+    }
+
+    .task-item {
+      padding: 15px;
+      margin-bottom: 15px;
+      background-color: #f9f9f9;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .task-item.completed {
+      text-decoration: line-through;
+      background-color: #d1e7dd;
+    }
+
+    .task-buttons button {
+      background-color: #28a745;
+      margin-right: 10px;
+      transition: background-color 0.3s ease;
+    }
+
+    .task-buttons button.remove {
+      background-color: #dc3545;
+    }
+
+    .task-buttons button:hover {
+      background-color: #218838;
+    }
+
+    .task-buttons button.remove:hover {
+      background-color: #c82333;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Modal de alerta */
+    .alert {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .alert-box {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .alert-box button {
+      background-color: #007BFF;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .alert-box button:hover {
+      background-color: #0056b3;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Lista de Tarefas</h1>
+    <input id="novaTarefa" type="text" class="task-input" placeholder="Digite nova tarefa">
+    <button onclick="adicionarTarefa()">Adicionar Tarefa</button>
+
+    <ul id="listaTarefas" class="task-list"></ul>
+  </div>
+
+  <div id="alertBox" class="alert">
+    <div class="alert-box">
+      <p id="alertMessage"></p>
+      <button onclick="fecharAlerta()">Fechar</button>
+    </div>
+  </div>
+
+  <script>
+    const apiUrl = 'http://127.0.0.1:5000/tarefas';
+
+    function carregarTarefas() {
+      fetch(apiUrl)
+        .then(res => res.json())
+        .then(data => {
+          const lista = document.getElementById('listaTarefas');
+          lista.innerHTML = '';
+          data.forEach(tarefa => {
+            const li = document.createElement('li');
+            li.className = 'task-item' + (tarefa.feito ? ' completed' : '');
+            li.innerHTML = `
+              <span>${tarefa.titulo}</span>
+              <div class="task-buttons">
+                <button onclick="concluirTarefa(${tarefa.id}, ${!tarefa.feito})">
+                  ${tarefa.feito ? 'Desfazer' : 'Concluir'}
+                </button>
+                <button class="remove" onclick="removerTarefa(${tarefa.id})">Remover</button>
+              </div>
+            `;
+            lista.appendChild(li);
+          });
+        })
+        .catch(err => console.error('Erro ao carregar tarefas:', err));
+    }
+
+    function adicionarTarefa() {
+      const titulo = document.getElementById('novaTarefa').value;
+      if (titulo.trim() === '') return mostrarAlerta('Digite um título válido para a tarefa.');
+
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ titulo })
+      })
+      .then(() => {
+        document.getElementById('novaTarefa').value = '';
+        carregarTarefas();
+      })
+      .catch(() => mostrarAlerta('Erro ao adicionar a tarefa.'));
+    }
+
+    function concluirTarefa(id, feito) {
+      fetch(`${apiUrl}/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ feito })
+      })
+      .then(() => carregarTarefas())
+      .catch(() => mostrarAlerta('Erro ao atualizar tarefa.'));
+    }
+
+    function removerTarefa(id) {
+      fetch(`${apiUrl}/${id}`, {
+        method: 'DELETE'
+      })
+      .then(() => carregarTarefas())
+      .catch(() => mostrarAlerta('Erro ao remover tarefa.'));
+    }
+
+    function mostrarAlerta(mensagem) {
+      document.getElementById('alertMessage').innerText = mensagem;
+      document.getElementById('alertBox').style.display = 'flex';
+    }
+
+    function fecharAlerta() {
+      document.getElementById('alertBox').style.display = 'none';
+    }
+
+    // Carrega ao abrir a página
+    carregarTarefas();
+  </script>
+</body>
+</html>

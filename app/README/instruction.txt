@@ -1,0 +1,104 @@
+✅ Como abrir corretamente no VS Code:
+🔥 Opção 1: Usar a extensão Live Server
+Abra o projeto no VS Code
+
+Clique com o botão direito no index.html
+
+Se você tiver o Live Server instalado, clique em:
+“Open with Live Server”
+
+Ele vai abrir algo como:
+http://127.0.0.1:5500/index.html
+
+Aí sim o JavaScript do navegador vai conseguir conversar com a API em http://127.0.0.1:5000.
+
+Se ainda não tiver o Live Server:
+
+Vá em Extensões (Ctrl+Shift+X)
+
+Pesquise por Live Server e instale
+
+🛠️ Alternativa: rodar um servidor local com Python
+Se preferir não usar extensões, pode rodar um servidor simples:
+
+No terminal do VS Code, entre na pasta do seu index.html:
+
+bash
+Copiar código
+cd D:\teste_flask
+Ative o ambiente se precisar (se já estiver ativado, pule):
+
+bash
+Copiar código
+.\venv\Scripts\activate
+Rode um servidor HTTP:
+
+bash
+Copiar código
+python -m http.server 8080
+Acesse no navegador:
+
+arduino
+Copiar código
+http://127.0.0.1:8080/index.html
+Assim tudo se comunica bonitinho e você consegue ver a interface funcionando com sua API Flask! Se quiser, posso até colocar tudo num templates/index.html e servir via Flask direto também.
+
+Quer que eu te mostre como fazer isso?
+
+
+
+
+
+
+Você disse:
+legal com a extensao live server funcionou 
+
+
+O ChatGPT disse:
+Boa!! 🎉 Que ótimo saber que o Live Server funcionou direitinho! Agora você está com o combo completo:
+
+✅ Backend com Flask
+✅ API de tarefas funcionando
+✅ Front-end em HTML + JS consumindo a API
+✅ Tudo rodando localmente via Live Server
+
+
+Copie e cole este script no seu terminal PowerShell dentro do VSCode:
+
+$root = Get-Location
+
+# Pega somente as pastas e arquivos do diretório atual
+$folders = Get-ChildItem -Directory
+$files = Get-ChildItem -File
+
+# Mostra as pastas com os arquivos de dentro
+foreach ($folder in $folders) {
+    Write-Host "├── $($folder.Name)/"
+    $innerFiles = Get-ChildItem -Path $folder.FullName -File
+    foreach ($file in $innerFiles) {
+        Write-Host "│   ├── $($file.Name)"
+    }
+}
+
+# Mostra os arquivos que estão diretamente na raiz
+foreach ($file in $files) {
+    Write-Host "├── $($file.Name)"
+}
+
+
+>> # Mostra os arquivos que estão diretamente na raiz
+>> foreach ($file in $files) {
+>>     Write-Host "├── $($file.Name)"
+>> }
+>>
+├── app/
+│   ├── routes.py
+│   ├── tarefas.py
+│   ├── __init__.py
+├── venv/
+│   ├── .gitignore
+│   ├── pyvenv.cfg
+├── index.html
+├── instruction.txt
+├── requiriments.txt
+├── run.py
